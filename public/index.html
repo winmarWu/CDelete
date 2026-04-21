@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CDelete - 本地 AI 磁盘分析助手</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <section class="hero">
+      <div class="hero-blob one"></div>
+      <div class="hero-blob two"></div>
+      <div class="container">
+        <div class="nav">
+          <div class="logo">CDelete</div>
+        </div>
+
+        <div class="badge">本地运行 · 不上传文件 · AI解释</div>
+        <h1 class="title">一键扫描<span>C盘/D盘</span>，给出可删建议</h1>
+        <p class="subtitle">
+          点击开始后，CDelete 会在本地分析文件夹和大文件，结合规则与 AI 输出用途说明，并给出「建议删除 / 谨慎删除 /
+          禁止删除」的风险分级报告。
+        </p>
+
+        <div class="panel">
+          <div class="form-row">
+            <select id="drive">
+              <option value="C">扫描 C 盘</option>
+              <option value="D">扫描 D 盘</option>
+            </select>
+            <input id="ai-api-key" type="password" placeholder="输入 DeepSeek API Key（sk-...）" />
+            <select id="ai-model">
+              <option value="deepseek-chat">deepseek-chat（推荐，速度更快）</option>
+              <option value="deepseek-reasoner">deepseek-reasoner（R1，更慢）</option>
+            </select>
+            <button class="btn-primary" id="scan-btn">开始扫描并生成报告</button>
+          </div>
+          <div class="hint">已启用加速策略：优先解释体积最大的高价值条目，其他条目使用规则解释。</div>
+          <div class="status" id="status"></div>
+        </div>
+      </div>
+    </section>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

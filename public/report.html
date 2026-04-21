@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CDelete 报告</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="report-page">
+    <div class="container">
+      <div class="nav">
+        <div class="logo">CDelete 报告</div>
+        <a href="/" class="muted">返回重新扫描</a>
+      </div>
+
+      <p id="meta" class="muted"></p>
+
+      <section class="grid-3">
+        <div class="card">
+          <h3>预计可释放空间</h3>
+          <strong id="reclaim">-</strong>
+        </div>
+        <div class="card">
+          <h3>安全可删项</h3>
+          <strong id="safe-count">-</strong>
+        </div>
+        <div class="card">
+          <h3>禁止删除项</h3>
+          <strong id="forbidden-count">-</strong>
+        </div>
+      </section>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>路径</th>
+              <th>大小</th>
+              <th>风险</th>
+              <th>建议</th>
+              <th>用途解释</th>
+              <th>风险说明</th>
+            </tr>
+          </thead>
+          <tbody id="report-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

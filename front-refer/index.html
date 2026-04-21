@@ -1,0 +1,2563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CloudSync Pro - AI驱动的团队协作平台</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* ========== CSS Variables & Design System ========== */
+        :root {
+            /* Colors - Deep Indigo/Violet with Electric Blue & Coral */
+            --bg-primary: #FFFFFF;
+            --bg-surface: #F8FAFC;
+            --bg-card: #FFFFFF;
+            --bg-gradient-start: #F8FAFC;
+            --bg-gradient-end: #EEF2FF;
+            --border-color: #E2E8F0;
+            --border-light: #F1F5F9;
+
+            --text-primary: #0F172A;
+            --text-secondary: #475569;
+            --text-muted: #94A3B8;
+            --text-white: #FFFFFF;
+
+            --primary: #6366F1;
+            --primary-light: #818CF8;
+            --primary-dark: #4F46E5;
+            --primary-glow: rgba(99, 102, 241, 0.3);
+
+            --accent-blue: #3B82F6;
+            --accent-teal: #14B8A6;
+            --accent-coral: #F97316;
+            --accent-pink: #EC4899;
+            --accent-purple: #8B5CF6;
+
+            --success: #10B981;
+            --warning: #F59E0B;
+            --error: #EF4444;
+
+            /* Gradients */
+            --gradient-primary: linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #3B82F6 100%);
+            --gradient-hero: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-coral: linear-gradient(135deg, #F97316 0%, #EC4899 100%);
+            --gradient-teal: linear-gradient(135deg, #14B8A6 0%, #3B82F6 100%);
+            --gradient-surface: linear-gradient(180deg, #F8FAFC 0%, #EEF2FF 100%);
+
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            --shadow-glow: 0 0 40px rgba(99, 102, 241, 0.3);
+            --shadow-glow-coral: 0 0 40px rgba(249, 115, 22, 0.3);
+
+            /* Radius */
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --radius-pill: 9999px;
+
+            /* Transitions */
+            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-reveal: 600ms cubic-bezier(0.22, 1, 0.36, 1);
+
+            /* Typography */
+            --font-display: 'Plus Jakarta Sans', sans-serif;
+            --font-body: 'Inter', sans-serif;
+
+            /* Spacing */
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --spacing-2xl: 3rem;
+            --spacing-3xl: 4rem;
+            --spacing-4xl: 6rem;
+            --spacing-5xl: 8rem;
+        }
+
+        /* ========== Reset & Base Styles ========== */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
+
+        body {
+            font-family: var(--font-body);
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-display);
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        button {
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        ul, ol {
+            list-style: none;
+        }
+
+        /* ========== Scroll Progress Bar ========== */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: var(--gradient-primary);
+            z-index: 10000;
+            transition: width 0.1s linear;
+        }
+
+        /* ========== Navigation ========== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1rem 2rem;
+            transition: all var(--transition-normal);
+        }
+
+        .navbar.scrolled {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            box-shadow: var(--shadow-md);
+            padding: 0.75rem 2rem;
+        }
+
+        .navbar-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .navbar-logo {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .navbar-nav {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .navbar-link {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            position: relative;
+            padding: 0.5rem 0;
+            transition: color var(--transition-fast);
+        }
+
+        .navbar-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: var(--gradient-primary);
+            transition: all var(--transition-normal);
+            transform: translateX(-50%);
+        }
+
+        .navbar-link:hover {
+            color: var(--primary);
+        }
+
+        .navbar-link:hover::after {
+            width: 100%;
+        }
+
+        .navbar-cta {
+            padding: 0.75rem 1.5rem;
+            background: var(--gradient-primary);
+            color: white;
+            font-weight: 600;
+            border-radius: var(--radius-pill);
+            transition: all var(--transition-fast);
+            box-shadow: var(--shadow-md);
+        }
+
+        .navbar-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .navbar-cta:active {
+            transform: scale(0.97);
+        }
+
+        .navbar-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            padding: 0.5rem;
+        }
+
+        .navbar-toggle span {
+            width: 24px;
+            height: 2px;
+            background: var(--text-primary);
+            transition: all var(--transition-fast);
+        }
+
+        /* ========== Hero Section ========== */
+        .hero {
+            min-height: 100vh;
+            padding: 8rem 2rem 4rem;
+            background: var(--gradient-surface);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+        }
+
+        .hero-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.5;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .hero-blob-1 {
+            width: 600px;
+            height: 600px;
+            background: var(--primary);
+            top: -200px;
+            right: -100px;
+            animation-delay: 0s;
+        }
+
+        .hero-blob-2 {
+            width: 400px;
+            height: 400px;
+            background: var(--accent-coral);
+            bottom: -100px;
+            left: -100px;
+            animation-delay: -2s;
+        }
+
+        .hero-blob-3 {
+            width: 300px;
+            height: 300px;
+            background: var(--accent-teal);
+            top: 50%;
+            left: 30%;
+            animation-delay: -4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-30px) scale(1.05); }
+        }
+
+        .hero-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-content {
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: var(--radius-pill);
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .hero-title span {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            max-width: 540px;
+        }
+
+        .hero-cta-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: var(--radius-pill);
+            transition: all var(--transition-fast);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.97);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary:active {
+            transform: scale(0.97);
+        }
+
+        .btn:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        .hero-trust {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .trust-avatars {
+            display: flex;
+        }
+
+        .trust-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px solid white;
+            margin-left: -10px;
+            object-fit: cover;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .trust-avatar:first-child {
+            margin-left: 0;
+        }
+
+        .trust-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .trust-text strong {
+            color: var(--text-primary);
+        }
+
+        .hero-visual {
+            position: relative;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .hero-dashboard {
+            background: white;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            padding: 1.5rem;
+            transform: perspective(1000px) rotateY(-5deg) rotateX(5deg);
+            transition: transform var(--transition-slow);
+        }
+
+        .hero-dashboard:hover {
+            transform: perspective(1000px) rotateY(-2deg) rotateX(2deg) translateY(-10px);
+        }
+
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .dashboard-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dashboard-dot.red { background: #EF4444; }
+        .dashboard-dot.yellow { background: #F59E0B; }
+        .dashboard-dot.green { background: #10B981; }
+
+        .dashboard-content {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .dashboard-card {
+            background: var(--bg-surface);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .dashboard-card-value {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .dashboard-card-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .dashboard-chart {
+            margin-top: 1rem;
+            height: 80px;
+            background: linear-gradient(180deg, rgba(99, 102, 241, 0.1) 0%, transparent 100%);
+            border-radius: var(--radius-md);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-line {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60%;
+            background: var(--gradient-primary);
+            opacity: 0.6;
+            clip-path: polygon(
+                0% 100%,
+                0% 60%,
+                10% 50%,
+                20% 70%,
+                30% 40%,
+                40% 55%,
+                50% 30%,
+                60% 45%,
+                70% 25%,
+                80% 40%,
+                90% 20%,
+                100% 35%,
+                100% 100%
+            );
+        }
+
+        /* ========== Stats Section ========== */
+        .stats {
+            padding: 4rem 2rem;
+            background: white;
+        }
+
+        .stats-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            background: var(--bg-surface);
+            transition: all var(--transition-normal);
+        }
+
+        .stat-item:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.5rem;
+        }
+
+        .stat-icon.purple {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        .stat-icon.coral {
+            background: rgba(249, 115, 22, 0.1);
+            color: var(--accent-coral);
+        }
+
+        .stat-icon.teal {
+            background: rgba(20, 184, 166, 0.1);
+            color: var(--accent-teal);
+        }
+
+        .stat-icon.blue {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-blue);
+        }
+
+        .stat-value {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        /* ========== Features Section ========== */
+        .features {
+            padding: 6rem 2rem;
+            background: var(--bg-surface);
+        }
+
+        .features-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-tag {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: var(--radius-pill);
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 4vw, 2.75rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .section-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .features-bento {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: all var(--transition-normal);
+            border: 1px solid var(--border-light);
+            cursor: pointer;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--primary-light);
+        }
+
+        .feature-card.large {
+            grid-column: span 2;
+            grid-row: span 2;
+        }
+
+        .feature-card.medium {
+            grid-column: span 1;
+            grid-row: span 2;
+        }
+
+        .feature-glow {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity var(--transition-fast);
+        }
+
+        .feature-card:hover .feature-glow {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-icon.gradient-purple {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .feature-icon.gradient-coral {
+            background: var(--gradient-coral);
+            color: white;
+        }
+
+        .feature-icon.gradient-teal {
+            background: var(--gradient-teal);
+            color: white;
+        }
+
+        .feature-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .feature-card.large .feature-title {
+            font-size: 1.5rem;
+        }
+
+        .feature-desc {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .feature-visual {
+            margin-top: 1.5rem;
+            height: 120px;
+            background: var(--bg-surface);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .feature-visual-content {
+            display: flex;
+            gap: 0.5rem;
+            align-items: flex-end;
+            height: 80px;
+        }
+
+        .feature-bar {
+            width: 24px;
+            background: var(--gradient-primary);
+            border-radius: 4px 4px 0 0;
+            animation: barGrow 2s ease-out infinite alternate;
+        }
+
+        .feature-bar:nth-child(1) { height: 40%; animation-delay: 0s; }
+        .feature-bar:nth-child(2) { height: 70%; animation-delay: 0.2s; }
+        .feature-bar:nth-child(3) { height: 50%; animation-delay: 0.4s; }
+        .feature-bar:nth-child(4) { height: 85%; animation-delay: 0.6s; }
+        .feature-bar:nth-child(5) { height: 60%; animation-delay: 0.8s; }
+
+        @keyframes barGrow {
+            from { transform: scaleY(0.8); }
+            to { transform: scaleY(1); }
+        }
+
+        /* ========== How It Works ========== */
+        .how-it-works {
+            padding: 6rem 2rem;
+            background: white;
+        }
+
+        .how-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            position: relative;
+        }
+
+        .steps-grid::before {
+            content: '';
+            position: absolute;
+            top: 40px;
+            left: 12.5%;
+            right: 12.5%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--accent-coral) 50%, var(--accent-teal) 100%);
+            z-index: 0;
+        }
+
+        .step-item {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step-number {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 0 auto 1.5rem;
+            position: relative;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .step-item:nth-child(2) .step-number {
+            border-color: var(--accent-coral);
+            color: var(--accent-coral);
+        }
+
+        .step-item:nth-child(3) .step-number {
+            border-color: var(--accent-teal);
+            color: var(--accent-teal);
+        }
+
+        .step-item:nth-child(4) .step-number {
+            border-color: var(--accent-purple);
+            color: var(--accent-purple);
+        }
+
+        .step-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .step-desc {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        /* ========== Pricing Section ========== */
+        .pricing {
+            padding: 6rem 2rem;
+            background: var(--bg-surface);
+        }
+
+        .pricing-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .pricing-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .toggle-label {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: color var(--transition-fast);
+        }
+
+        .toggle-label.active {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .toggle-switch {
+            width: 56px;
+            height: 28px;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-pill);
+            position: relative;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform var(--transition-normal);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .toggle-switch.annual::after {
+            transform: translateX(28px);
+        }
+
+        .save-badge {
+            background: var(--gradient-coral);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-pill);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            align-items: start;
+        }
+
+        .pricing-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: 2.5rem;
+            border: 2px solid var(--border-light);
+            transition: all var(--transition-normal);
+            position: relative;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .pricing-card.popular {
+            border-color: var(--primary);
+            transform: scale(1.05);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .pricing-card.popular:hover {
+            transform: scale(1.05) translateY(-8px);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gradient-primary);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: var(--radius-pill);
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .pricing-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .pricing-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .pricing-price {
+            display: flex;
+            align-items: baseline;
+            gap: 0.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .price-currency {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .price-value {
+            font-family: var(--font-display);
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transition: all var(--transition-normal);
+        }
+
+        .price-period {
+            font-size: 1rem;
+            color: var(--text-muted);
+        }
+
+        .pricing-features {
+            margin-bottom: 2rem;
+        }
+
+        .pricing-feature {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 0;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .pricing-feature:last-child {
+            border-bottom: none;
+        }
+
+        .feature-check {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+
+        .pricing-cta {
+            width: 100%;
+            padding: 1rem;
+            border-radius: var(--radius-pill);
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all var(--transition-fast);
+        }
+
+        .pricing-cta-primary {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .pricing-cta-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .pricing-cta-secondary {
+            background: white;
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+        }
+
+        .pricing-cta-secondary:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* ========== Testimonials ========== */
+        .testimonials {
+            padding: 6rem 2rem;
+            background: white;
+        }
+
+        .testimonials-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .testimonial-card {
+            background: var(--bg-surface);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            transition: all var(--transition-normal);
+            border: 1px solid var(--border-light);
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .testimonial-rating {
+            display: flex;
+            gap: 0.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .star {
+            color: var(--warning);
+            font-size: 1.25rem;
+        }
+
+        .testimonial-text {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .author-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .author-info {
+            flex: 1;
+        }
+
+        .author-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .author-role {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        /* ========== FAQ Section ========== */
+        .faq {
+            padding: 6rem 2rem;
+            background: var(--bg-surface);
+        }
+
+        .faq-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .faq-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .faq-item {
+            background: white;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+            transition: all var(--transition-fast);
+        }
+
+        .faq-item:hover {
+            border-color: var(--primary-light);
+        }
+
+        .faq-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: background var(--transition-fast);
+        }
+
+        .faq-header:hover {
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .faq-question {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .faq-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform var(--transition-normal);
+            color: var(--primary);
+            font-size: 1.25rem;
+        }
+
+        .faq-item.open .faq-icon {
+            transform: rotate(180deg);
+        }
+
+        .faq-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height var(--transition-slow), padding var(--transition-slow);
+        }
+
+        .faq-item.open .faq-content {
+            max-height: 500px;
+        }
+
+        .faq-answer {
+            padding: 0 1.5rem 1.5rem;
+            font-size: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* ========== CTA Section ========== */
+        .cta {
+            padding: 6rem 2rem;
+            background: var(--gradient-primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-bg {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+        }
+
+        .cta-pattern {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%);
+        }
+
+        .cta-container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .cta-subtitle {
+            font-size: 1.125rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 2.5rem;
+        }
+
+        .newsletter-form {
+            display: flex;
+            gap: 1rem;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .newsletter-input {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: var(--radius-pill);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: all var(--transition-fast);
+        }
+
+        .newsletter-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .newsletter-input:focus {
+            border-color: white;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .newsletter-input.error {
+            border-color: var(--error);
+        }
+
+        .newsletter-btn {
+            padding: 1rem 2rem;
+            background: white;
+            color: var(--primary);
+            font-weight: 600;
+            border-radius: var(--radius-pill);
+            transition: all var(--transition-fast);
+            white-space: nowrap;
+        }
+
+        .newsletter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .newsletter-btn:active {
+            transform: scale(0.97);
+        }
+
+        /* ========== Footer ========== */
+        .footer {
+            padding: 4rem 2rem 2rem;
+            background: var(--text-primary);
+            color: white;
+        }
+
+        .footer-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr repeat(3, 1fr);
+            gap: 4rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-brand {
+            max-width: 300px;
+        }
+
+        .footer-logo {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .footer-desc {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .social-link {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-fast);
+            color: white;
+        }
+
+        .social-link:hover {
+            background: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        .footer-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: white;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .footer-link {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            transition: color var(--transition-fast);
+        }
+
+        .footer-link:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .footer-copyright {
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* ========== Toast Notification ========== */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-xl);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            z-index: 10000;
+            transform: translateX(150%);
+            transition: transform var(--transition-normal);
+            border-left: 4px solid var(--success);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toast-text {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        /* ========== Modal ========== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--transition-normal);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: white;
+            border-radius: var(--radius-xl);
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow: hidden;
+            transform: scale(0.9) translateY(20px);
+            transition: transform var(--transition-normal);
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            transition: all var(--transition-fast);
+        }
+
+        .modal-close:hover {
+            background: var(--bg-surface);
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            max-height: 50vh;
+        }
+
+        .modal-text {
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border-light);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        /* ========== Scroll Reveal Animation ========== */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity var(--transition-reveal), transform var(--transition-reveal);
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reveal-stagger > * {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity var(--transition-reveal), transform var(--transition-reveal);
+        }
+
+        .reveal-stagger.visible > *:nth-child(1) { transition-delay: 0ms; opacity: 1; transform: translateY(0); }
+        .reveal-stagger.visible > *:nth-child(2) { transition-delay: 100ms; opacity: 1; transform: translateY(0); }
+        .reveal-stagger.visible > *:nth-child(3) { transition-delay: 200ms; opacity: 1; transform: translateY(0); }
+        .reveal-stagger.visible > *:nth-child(4) { transition-delay: 300ms; opacity: 1; transform: translateY(0); }
+        .reveal-stagger.visible > *:nth-child(5) { transition-delay: 400ms; opacity: 1; transform: translateY(0); }
+        .reveal-stagger.visible > *:nth-child(6) { transition-delay: 500ms; opacity: 1; transform: translateY(0); }
+
+        /* ========== Responsive ========== */
+        @media (max-width: 1024px) {
+            .hero-container {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .hero-content {
+                order: 1;
+            }
+
+            .hero-visual {
+                order: 0;
+                max-width: 500px;
+                margin: 0 auto;
+            }
+
+            .hero-subtitle {
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .hero-cta-group {
+                justify-content: center;
+            }
+
+            .hero-trust {
+                justify-content: center;
+            }
+
+            .features-bento {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .feature-card.large,
+            .feature-card.medium {
+                grid-column: span 1;
+                grid-row: span 1;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .steps-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .steps-grid::before {
+                display: none;
+            }
+
+            .pricing-grid {
+                grid-template-columns: 1fr;
+                max-width: 400px;
+                margin: 0 auto;
+            }
+
+            .pricing-card.popular {
+                transform: none;
+                order: -1;
+            }
+
+            .testimonials-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar-nav {
+                display: none;
+            }
+
+            .navbar-toggle {
+                display: flex;
+            }
+
+            .hero {
+                padding: 6rem 1.5rem 3rem;
+            }
+
+            .hero-cta-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .features-bento {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .steps-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .newsletter-form {
+                flex-direction: column;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+
+        /* ========== Mobile Menu ========== */
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 80%;
+            max-width: 300px;
+            height: 100vh;
+            background: white;
+            z-index: 10001;
+            padding: 2rem;
+            transition: right var(--transition-normal);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .mobile-menu.open {
+            right: 0;
+        }
+
+        .mobile-menu-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        .mobile-menu-links {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .mobile-menu-link {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            padding: 0.5rem 0;
+        }
+
+        .mobile-menu-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--transition-normal);
+        }
+
+        .mobile-menu-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+
+            html {
+                scroll-behavior: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Scroll Progress -->
+    <div class="scroll-progress"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="#" class="navbar-logo">CloudSync Pro</a>
+            <div class="navbar-nav">
+                <a href="#features" class="navbar-link">功能特性</a>
+                <a href="#pricing" class="navbar-link">价格方案</a>
+                <a href="#how-it-works" class="navbar-link">如何使用</a>
+                <a href="#faq" class="navbar-link">常见问题</a>
+            </div>
+            <button class="navbar-cta" onclick="showToast('欢迎开始免费试用！')">开始免费试用</button>
+            <button class="navbar-toggle" onclick="toggleMobileMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu-overlay" onclick="toggleMobileMenu()"></div>
+    <div class="mobile-menu">
+        <button class="mobile-menu-close" onclick="toggleMobileMenu()">×</button>
+        <div class="mobile-menu-links">
+            <a href="#features" class="mobile-menu-link" onclick="toggleMobileMenu()">功能特性</a>
+            <a href="#pricing" class="mobile-menu-link" onclick="toggleMobileMenu()">价格方案</a>
+            <a href="#how-it-works" class="mobile-menu-link" onclick="toggleMobileMenu()">如何使用</a>
+            <a href="#faq" class="mobile-menu-link" onclick="toggleMobileMenu()">常见问题</a>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-bg">
+            <div class="hero-blob hero-blob-1"></div>
+            <div class="hero-blob hero-blob-2"></div>
+            <div class="hero-blob hero-blob-3"></div>
+        </div>
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="hero-badge">AI驱动的新一代协作平台</div>
+                <h1 class="hero-title">用<span>AI智能</span>重塑团队协作体验</h1>
+                <p class="hero-subtitle">CloudSync Pro帮助团队更智能地工作，而非更辛苦。自动化任务流程、实时同步协作，让您的生产力提升10倍。</p>
+                <div class="hero-cta-group">
+                    <button class="btn btn-primary" onclick="showToast('正在启动免费试用...')">
+                        开始免费试用
+                        <span>→</span>
+                    </button>
+                    <button class="btn btn-secondary" onclick="openModal('demo')">
+                        观看演示
+                        <span>▶</span>
+                    </button>
+                </div>
+                <div class="hero-trust">
+                    <div class="trust-avatars">
+                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop" alt="User" class="trust-avatar" loading="lazy">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop" alt="User" class="trust-avatar" loading="lazy">
+                        <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop" alt="User" class="trust-avatar" loading="lazy">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop" alt="User" class="trust-avatar" loading="lazy">
+                    </div>
+                    <span class="trust-text">已被 <strong>50,000+</strong> 团队信赖</span>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-dashboard">
+                    <div class="dashboard-header">
+                        <div class="dashboard-dot red"></div>
+                        <div class="dashboard-dot yellow"></div>
+                        <div class="dashboard-dot green"></div>
+                    </div>
+                    <div class="dashboard-content">
+                        <div class="dashboard-card">
+                            <div class="dashboard-card-value" data-count="2847">0</div>
+                            <div class="dashboard-card-label">任务完成</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="dashboard-card-value" data-count="156">0</div>
+                            <div class="dashboard-card-label">团队成员</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="dashboard-card-value" data-count="98">0</div>
+                            <div class="dashboard-card-label">%效率提升</div>
+                        </div>
+                    </div>
+                    <div class="dashboard-chart">
+                        <div class="chart-line"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="stats-container">
+            <div class="stats-grid reveal-stagger">
+                <div class="stat-item">
+                    <div class="stat-icon purple">👥</div>
+                    <div class="stat-value" data-count="50000">0</div>
+                    <div class="stat-label">活跃团队</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon coral">⚡</div>
+                    <div class="stat-value" data-count="99">0</div>
+                    <div class="stat-label">%正常运行时间</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon teal">🌍</div>
+                    <div class="stat-value" data-count="24">0</div>
+                    <div class="stat-label">/7 全天候支持</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon blue">🔗</div>
+                    <div class="stat-value" data-count="150">0</div>
+                    <div class="stat-label">+ 集成应用</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="features-container">
+            <div class="section-header reveal">
+                <span class="section-tag">核心功能</span>
+                <h2 class="section-title">强大功能，简单操作</h2>
+                <p class="section-subtitle">我们提供一整套智能工具，帮助您的团队实现无缝协作</p>
+            </div>
+            <div class="features-bento reveal-stagger">
+                <div class="feature-card large" onclick="openModal('feature-ai')">
+                    <div class="feature-glow"></div>
+                    <div class="feature-icon gradient-purple">🤖</div>
+                    <h3 class="feature-title">AI任务自动化</h3>
+                    <p class="feature-desc">利用先进的人工智能技术，自动识别、分类和分配任务。智能工作流引擎可根据团队习惯自动优化任务分配，减少90%的手动操作时间。</p>
+                    <div class="feature-visual">
+                        <div class="feature-visual-content">
+                            <div class="feature-bar"></div>
+                            <div class="feature-bar"></div>
+                            <div class="feature-bar"></div>
+                            <div class="feature-bar"></div>
+                            <div class="feature-bar"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="feature-card" onclick="openModal('feature-collab')">
+                    <div class="feature-glow"></div>
+                    <div class="feature-icon gradient-coral">💬</div>
+                    <h3 class="feature-title">实时协作</h3>
+                    <p class="feature-desc">多人同时编辑，毫秒级同步，让远程团队如同面对面协作。</p>
+                </div>
+                <div class="feature-card medium" onclick="openModal('feature-analytics')">
+                    <div class="feature-glow"></div>
+                    <div class="feature-icon gradient-teal">📊</div>
+                    <h3 class="feature-title">智能分析</h3>
+                    <p class="feature-desc">深度数据洞察，可视化报表，助您做出更明智的决策。实时监控团队绩效，预测项目风险。</p>
+                </div>
+                <div class="feature-card" onclick="openModal('feature-notify')">
+                    <div class="feature-glow"></div>
+                    <div class="feature-icon gradient-purple">🔔</div>
+                    <h3 class="feature-title">智能通知</h3>
+                    <p class="feature-desc">基于重要性的智能提醒，避免信息过载。</p>
+                </div>
+                <div class="feature-card" onclick="openModal('feature-security')">
+                    <div class="feature-glow"></div>
+                    <div class="feature-icon gradient-coral">🔒</div>
+                    <h3 class="feature-title">企业级安全</h3>
+                    <p class="feature-desc">端到端加密，SOC2认证，您的数据安全有保障。</p>
+                </div>
+                <div class="feature-card" onclick="openModal('feature-workflow')">
+                    <div class="feature-glow"></div>
+                    <div class="feature-icon gradient-teal">⚙️</div>
+                    <h3 class="feature-title">自定义工作流</h3>
+                    <p class="feature-desc">拖拽式流程设计，适配各种业务场景。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="how-container">
+            <div class="section-header reveal">
+                <span class="section-tag">使用流程</span>
+                <h2 class="section-title">四步开启智能协作</h2>
+                <p class="section-subtitle">简单几步，即可让您的团队享受AI带来的效率革命</p>
+            </div>
+            <div class="steps-grid reveal-stagger">
+                <div class="step-item">
+                    <div class="step-number">1</div>
+                    <h3 class="step-title">连接工具</h3>
+                    <p class="step-desc">一键集成您常用的150+应用，无缝迁移现有数据</p>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">2</div>
+                    <h3 class="step-title">设置工作流</h3>
+                    <p class="step-desc">使用可视化编辑器，5分钟搭建专属自动化流程</p>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">3</div>
+                    <h3 class="step-title">实时协作</h3>
+                    <p class="step-desc">邀请团队成员，开始享受毫秒级同步的协作体验</p>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">4</div>
+                    <h3 class="step-title">分析优化</h3>
+                    <p class="step-desc">AI持续学习团队习惯，自动优化工作流程</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing" id="pricing">
+        <div class="pricing-container">
+            <div class="section-header reveal">
+                <span class="section-tag">价格方案</span>
+                <h2 class="section-title">选择适合您的方案</h2>
+                <p class="section-subtitle">灵活的定价，让每个团队都能找到最适合的方案</p>
+            </div>
+            <div class="pricing-toggle reveal">
+                <span class="toggle-label active" id="monthly-label">月付</span>
+                <div class="toggle-switch" onclick="togglePricing()"></div>
+                <span class="toggle-label" id="annual-label">年付</span>
+                <span class="save-badge">省20%</span>
+            </div>
+            <div class="pricing-grid reveal-stagger">
+                <div class="pricing-card">
+                    <h3 class="pricing-name">入门版</h3>
+                    <p class="pricing-desc">适合小型团队起步</p>
+                    <div class="pricing-price">
+                        <span class="price-currency">¥</span>
+                        <span class="price-value" data-monthly="0" data-annual="0">0</span>
+                        <span class="price-period">/月</span>
+                    </div>
+                    <div class="pricing-features">
+                        <div class="pricing-feature">
+                            <span class="feature-check">✓</span>
+                            最多5个用户
+                        </div>
+                        <div class="pricing-feature">
+                            <span class="feature-check">✓</span>
+                            10GB存储空间
+                        </div>
+                        <div class="pricing-feature">
+                            <span class="feature-check">✓</span>
+                            基础AI功能
+                        </div>
+                        <div class="pricing-feature">
+                            <span class="feature-check">✓</span>
+                            邮件支持
+                        </div>
+                        <div class="pricing-feature">
+                            <span class="feature-check">✓</span>
+                            社区论坛访问
+                        </div>
+                    </div>
+                    <button class="pricing-cta pricing-cta-secondary" onclick="showToast('已选择入门版')">免费开始</button>
+                </div>
+                <div class="pricing-card popular">
+                    <span class="popular-badge">最受欢迎</span>
+                    <h3 class="pricing-name">专业版</h3>
+                    <p class="pricing-desc">适合成长中的团队</p>
+                    <div class="pricing-price">
+                        <span class="price-currency">¥</span>
+                        <span class="price-value" data-monthly="199" data-annual="159">199</span>
+                        <span class="price-period">/月</span>
+                    </div>
+                    <div class="pricing-features">
+                        <div class="pricing-feature">
+                            <span class="feature-check">✓</span>
+                            最多25个用户
+                        </div>
+                        <div class="pricing-feature">
+                            <span class="feature-check">✓</span>
+                            100GB存储空间
+                        </div>
+                        <div class="pricing-feature">
+                            <span class="feature-check">✓</span>
+                            高级AI自动化
+                        </div>
+                        <div class="pricing-feature">
+                            <span class="feature-check">✓</span>
+                            优先邮件支持
+                        </div>
+                        <div class="pricing-feature">
+                            <span class="feature-check">✓</span>
+                            自定义工作流
+                        </div>
+                        <div class="pricing-feature">
+                            <span class="feature-check">✓</span>
+                            数据分析报表
+                        </div>
+                    </div>
+                    <button class="pricing-cta pricing-cta-primary" onclick="showToast('已选择专业版')">立即升级</button>
+                </div>
+                <div class="pricing-card">
+                    <h3 class="pricing-name">企业版</h3>
+                    <p class="pricing-desc">适合大型企业</p>
+                    <div class="pricing-price">
+                        <span class="price-currency">¥</span>
+                        <span class="price-value" data-monthly="699" data-annual="559">699</span>
+                        <span class="price-period">/月</span>
+                    </div>
+                    <div class="pricing-features">
+                        <div class="pricing-feature">
+                            <span class="feature-check">✓</span>
+                            无限用户
+                        </div>
+                        <div class="pricing-feature">
+                            <span class="feature-check">✓</span>
+                            无限存储空间
+                        </div>
+                        <div class="pricing-feature">
+                            <span class="feature-check">✓</span>
+                            全部AI功能
+                        </div>
+                        <div class="pricing-feature">
+                            <span class="feature-check">✓</span>
+                            24/7专属支持
+                        </div>
+                        <div class="pricing-feature">
+                            <span class="feature-check">✓</span>
+                            自定义集成
+                        </div>
+                        <div class="pricing-feature">
+                            <span class="feature-check">✓</span>
+                            SLA保障
+                        </div>
+                    </div>
+                    <button class="pricing-cta pricing-cta-secondary" onclick="showToast('企业版需求已提交')">联系销售</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials">
+        <div class="testimonials-container">
+            <div class="section-header reveal">
+                <span class="section-tag">用户评价</span>
+                <h2 class="section-title">深受用户喜爱</h2>
+                <p class="section-subtitle">听听他们怎么说</p>
+            </div>
+            <div class="testimonials-grid reveal-stagger">
+                <div class="testimonial-card">
+                    <div class="testimonial-rating">
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                    </div>
+                    <p class="testimonial-text">"CloudSync Pro彻底改变了我们团队的工作方式。AI自动化功能帮我们节省了大量时间，现在团队可以专注于真正重要的工作。"</p>
+                    <div class="testimonial-author">
+                        <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop" alt="Avatar" class="author-avatar" loading="lazy">
+                        <div class="author-info">
+                            <div class="author-name">张明</div>
+                            <div class="author-role">产品经理 @ TechCorp</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-rating">
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                    </div>
+                    <p class="testimonial-text">"实时协作功能太棒了！我们团队分布在全球各地，但现在感觉就像在同一个办公室工作一样。强烈推荐！"</p>
+                    <div class="testimonial-author">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop" alt="Avatar" class="author-avatar" loading="lazy">
+                        <div class="author-info">
+                            <div class="author-name">李华</div>
+                            <div class="author-role">技术总监 @ GlobalSoft</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-rating">
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                    </div>
+                    <p class="testimonial-text">"客户支持团队响应迅速，产品功能不断更新迭代。这是我们用过最好的协作工具，物有所值！"</p>
+                    <div class="testimonial-author">
+                        <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop" alt="Avatar" class="author-avatar" loading="lazy">
+                        <div class="author-info">
+                            <div class="author-name">王芳</div>
+                            <div class="author-role">运营总监 @ StartupX</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq" id="faq">
+        <div class="faq-container">
+            <div class="section-header reveal">
+                <span class="section-tag">常见问题</span>
+                <h2 class="section-title">还有疑问？</h2>
+                <p class="section-subtitle">以下是用户最常问的问题</p>
+            </div>
+            <div class="faq-list reveal-stagger">
+                <div class="faq-item">
+                    <div class="faq-header" onclick="toggleFaq(this)">
+                        <h3 class="faq-question">免费试用包含哪些功能？</h3>
+                        <span class="faq-icon">⌄</span>
+                    </div>
+                    <div class="faq-content">
+                        <p class="faq-answer">免费试用包含入门版的所有功能，您可以体验AI任务自动化、基础协作功能和5个用户席位。试用期为14天，无需信用卡即可开始。</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-header" onclick="toggleFaq(this)">
+                        <h3 class="faq-question">数据安全性如何保障？</h3>
+                        <span class="faq-icon">⌄</span>
+                    </div>
+                    <div class="faq-content">
+                        <p class="faq-answer">我们采用银行级别的端到端加密技术，所有数据存储在通过SOC2认证的数据中心。我们还支持企业级SSO、审计日志和自定义数据保留策略。</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-header" onclick="toggleFaq(this)">
+                        <h3 class="faq-question">可以与哪些工具集成？</h3>
+                        <span class="faq-icon">⌄</span>
+                    </div>
+                    <div class="faq-content">
+                        <p class="faq-answer">CloudSync Pro支持与150+主流工具集成，包括Slack、Microsoft Teams、Google Workspace、Jira、GitHub、Notion等。我们还提供开放的API供自定义集成。</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-header" onclick="toggleFaq(this)">
+                        <h3 class="faq-question">如何获得技术支持？</h3>
+                        <span class="faq-icon">⌄</span>
+                    </div>
+                    <div class="faq-content">
+                        <p class="faq-answer">入门版用户可通过邮件获得支持；专业版用户享有优先邮件支持；企业版用户则有24/7专属客户成功经理和电话支持服务。</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-header" onclick="toggleFaq(this)">
+                        <h3 class="faq-question">年付和月付有什么区别？</h3>
+                        <span class="faq-icon">⌄</span>
+                    </div>
+                    <div class="faq-content">
+                        <p class="faq-answer">年付方案可享受20%的折扣优惠，相当于免费使用2.4个月。您随时可以切换方案，已支付的费用将按比例折算。</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-header" onclick="toggleFaq(this)">
+                        <h3 class="faq-question">可以导出数据吗？</h3>
+                        <span class="faq-icon">⌄</span>
+                    </div>
+                    <div class="faq-content">
+                        <p class="faq-answer">是的，您可以随时导出所有数据。我们支持CSV、JSON和PDF等多种格式，确保您对数据的完全所有权。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="cta-bg">
+            <div class="cta-pattern"></div>
+        </div>
+        <div class="cta-container reveal">
+            <h2 class="cta-title">准备好提升团队效率了吗？</h2>
+            <p class="cta-subtitle">立即订阅，开启14天免费试用，无需信用卡</p>
+            <form class="newsletter-form" onsubmit="handleNewsletterSubmit(event)">
+                <input type="email" class="newsletter-input" placeholder="输入您的工作邮箱" required>
+                <button type="submit" class="newsletter-btn">立即开始</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <div class="footer-logo">CloudSync Pro</div>
+                    <p class="footer-desc">AI驱动的团队协作平台，帮助全球50,000+团队提升工作效率。</p>
+                    <div class="footer-social">
+                        <a href="#" class="social-link" onclick="showToast('Twitter链接')">𝕏</a>
+                        <a href="#" class="social-link" onclick="showToast('LinkedIn链接')">in</a>
+                        <a href="#" class="social-link" onclick="showToast('GitHub链接')">Gh</a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h4 class="footer-title">产品</h4>
+                    <div class="footer-links">
+                        <a href="#features" class="footer-link">功能特性</a>
+                        <a href="#pricing" class="footer-link">价格方案</a>
+                        <a href="#" class="footer-link" onclick="showToast('集成应用')">集成应用</a>
+                        <a href="#" class="footer-link" onclick="showToast('更新日志')">更新日志</a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h4 class="footer-title">资源</h4>
+                    <div class="footer-links">
+                        <a href="#" class="footer-link" onclick="showToast('帮助中心')">帮助中心</a>
+                        <a href="#" class="footer-link" onclick="showToast('开发文档')">开发文档</a>
+                        <a href="#" class="footer-link" onclick="showToast('API文档')">API文档</a>
+                        <a href="#" class="footer-link" onclick="showToast('社区论坛')">社区论坛</a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h4 class="footer-title">公司</h4>
+                    <div class="footer-links">
+                        <a href="#" class="footer-link" onclick="showToast('关于我们')">关于我们</a>
+                        <a href="#" class="footer-link" onclick="showToast('加入我们')">加入我们</a>
+                        <a href="#" class="footer-link" onclick="showToast('联系我们')">联系我们</a>
+                        <a href="#" class="footer-link" onclick="showToast('隐私政策')">隐私政策</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p class="footer-copyright">© 2026 CloudSync Pro. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <span class="toast-icon">✓</span>
+        <span class="toast-text" id="toast-text">操作成功</span>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modal" onclick="closeModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modal-title">功能详情</h3>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-text" id="modal-content">功能详情内容...</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">关闭</button>
+                <button class="btn btn-primary" onclick="showToast('功能即将上线')">了解更多</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== Scroll Progress ==========
+        const scrollProgress = document.querySelector('.scroll-progress');
+        window.addEventListener('scroll', () => {
+            const scrolled = window.scrollY;
+            const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = (scrolled / maxScroll) * 100;
+            scrollProgress.style.width = progress + '%';
+        });
+
+        // ========== Navbar Scroll Effect ==========
+        const navbar = document.querySelector('.navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // ========== Mobile Menu ==========
+        function toggleMobileMenu() {
+            document.querySelector('.mobile-menu').classList.toggle('open');
+            document.querySelector('.mobile-menu-overlay').classList.toggle('open');
+        }
+
+        // ========== Toast Notification ==========
+        let toastTimeout;
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastText = document.getElementById('toast-text');
+            toastText.textContent = message;
+            toast.classList.add('show');
+
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // ========== FAQ Accordion ==========
+        function toggleFaq(header) {
+            const item = header.parentElement;
+            const allItems = document.querySelectorAll('.faq-item');
+
+            allItems.forEach(faq => {
+                if (faq !== item) {
+                    faq.classList.remove('open');
+                }
+            });
+
+            item.classList.toggle('open');
+        }
+
+        // ========== Pricing Toggle ==========
+        let isAnnual = false;
+        function togglePricing() {
+            isAnnual = !isAnnual;
+            const toggle = document.querySelector('.toggle-switch');
+            const monthlyLabel = document.getElementById('monthly-label');
+            const annualLabel = document.getElementById('annual-label');
+            const prices = document.querySelectorAll('.price-value');
+
+            toggle.classList.toggle('annual', isAnnual);
+            monthlyLabel.classList.toggle('active', !isAnnual);
+            annualLabel.classList.toggle('active', isAnnual);
+
+            prices.forEach(price => {
+                const monthly = price.dataset.monthly;
+                const annual = price.dataset.annual;
+                price.textContent = isAnnual ? annual : monthly;
+            });
+        }
+
+        // ========== Modal ==========
+        const modalContent = {
+            'demo': { title: '产品演示', content: 'CloudSync Pro是一个AI驱动的团队协作平台。我们的演示视频将展示如何使用AI自动化任务、实时协作和数据分析功能。敬请期待！' },
+            'feature-ai': { title: 'AI任务自动化', content: '利用先进的机器学习算法，自动识别、分类和分配任务。智能工作流引擎会根据团队的历史数据自动优化任务分配策略，减少90%的手动操作时间。支持自然语言输入，只需描述您的需求，AI即可生成完整的任务流程。' },
+            'feature-collab': { title: '实时协作', content: '基于WebSocket技术，实现毫秒级数据同步。多人同时编辑同一文档时，每个人的光标位置和编辑内容都会实时显示。支持评论、@提及、表情反应等丰富的互动功能，让远程协作如同面对面一样自然流畅。' },
+            'feature-analytics': { title: '智能分析', content: '深度数据挖掘和可视化报表，帮助您洞察团队工作效率。实时监控关键指标，预测项目风险，提供个性化的优化建议。支持自定义仪表板和数据导出，满足不同的分析需求。' },
+            'feature-notify': { title: '智能通知', content: '基于机器学习的重要性评估算法，自动过滤低优先级通知。支持多渠道推送（应用内、邮件、Slack、短信），用户可根据消息类型自定义通知规则，有效避免信息过载，专注重要事项。' },
+            'feature-security': { title: '企业级安全', content: '采用AES-256端到端加密，数据存储在通过SOC2 Type II认证的数据中心。支持企业级SSO（单点登录）、双因素认证、审计日志和自定义数据保留策略。我们承诺绝不将您的数据用于AI训练。' },
+            'feature-workflow': { title: '自定义工作流', content: '可视化拖拽式流程设计器，无需编程即可创建复杂的自动化工作流。提供丰富的预设模板和触发器，支持与第三方应用的无缝集成。工作流执行支持条件分支、循环、延时等高级逻辑。' }
+        };
+
+        function openModal(type) {
+            const modal = document.getElementById('modal');
+            const title = document.getElementById('modal-title');
+            const content = document.getElementById('modal-content');
+
+            const data = modalContent[type] || { title: '详情', content: '更多信息即将推出...' };
+            title.textContent = data.title;
+            content.textContent = data.content;
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(event) {
+            if (!event || event.target === document.getElementById('modal')) {
+                document.getElementById('modal').classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+
+        // Close modal on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // ========== Newsletter Form ==========
+        function handleNewsletterSubmit(e) {
+            e.preventDefault();
+            const input = e.target.querySelector('input');
+            if (input.value && input.value.includes('@')) {
+                showToast('订阅成功！请查收确认邮件。');
+                input.value = '';
+            } else {
+                input.classList.add('error');
+                setTimeout(() => input.classList.remove('error'), 2000);
+            }
+        }
+
+        // ========== Count Up Animation ==========
+        function animateCounter(element) {
+            const target = parseInt(element.dataset.count);
+            const duration = 2000;
+            const start = performance.now();
+
+            function update(currentTime) {
+                const elapsed = currentTime - start;
+                const progress = Math.min(elapsed / duration, 1);
+
+                // easeOutExpo
+                const easeProgress = 1 - Math.pow(2, -10 * progress);
+                const current = Math.floor(easeProgress * target);
+
+                element.textContent = current.toLocaleString();
+
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                } else {
+                    element.textContent = target.toLocaleString();
+                }
+            }
+
+            requestAnimationFrame(update);
+        }
+
+        // ========== Scroll Reveal ==========
+        const observerOptions = {
+            threshold: 0.15,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+
+                    // Animate counters within the revealed element
+                    const counters = entry.target.querySelectorAll('[data-count]');
+                    counters.forEach(counter => animateCounter(counter));
+
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => {
+            revealObserver.observe(el);
+        });
+
+        // ========== Feature Card Glow Effect ==========
+        document.querySelectorAll('.feature-card').forEach(card => {
+            const glow = card.querySelector('.feature-glow');
+            if (glow) {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    glow.style.left = x - 100 + 'px';
+                    glow.style.top = y - 100 + 'px';
+                });
+            }
+        });
+
+        // ========== Smooth Scroll for Anchor Links ==========
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offsetTop = target.offsetTop - 80;
+                    window.scrollTo({
+                        top: offsetTop,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

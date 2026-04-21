@@ -1,0 +1,25 @@
+{
+  "name": "cdelete",
+  "version": "0.1.0",
+  "description": "Local AI disk analyzer for Windows drives",
+  "main": "src/server.js",
+  "bin": {
+    "cdelete": "./bin/cdelete.js"
+  },
+  "scripts": {
+    "start": "node ./bin/cdelete.js",
+    "dev": "node ./src/server.js"
+  },
+  "keywords": [
+    "disk-cleaner",
+    "windows",
+    "ai",
+    "local-report"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2",
+    "jsonrepair": "^3.12.0"
+  }
+}
