@@ -44,9 +44,9 @@ cdelete
 - `CDELETE_MAX_FOLDERS`：默认 `120`
 - `CDELETE_MAX_FILES`：默认 `120`
 - `CDELETE_STAT_CONCURRENCY`：目录内并发 `stat` 数，默认 `24`
-- `CDELETE_AI_MAX_ITEMS`：走 AI 解释的条目上限，默认 `80`
-- `CDELETE_AI_BATCH_SIZE`：AI 单批条目数，默认 `16`
-- `CDELETE_AI_BATCH_CONCURRENCY`：AI 并发批次数，默认 `3`
+- `CDELETE_AI_MAX_ITEMS`：走 AI 解释的条目上限，默认 `0`（表示全部条目）
+- `CDELETE_AI_BATCH_SIZE`：AI 单批条目数，默认 `8`（质量优先，减少漏解释）
+- `CDELETE_AI_BATCH_CONCURRENCY`：AI 并发批次数，默认 `2`
 
 ## 目录结构
 

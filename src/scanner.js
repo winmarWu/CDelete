@@ -80,7 +80,6 @@ async function walkDrive(rootPath) {
         scannedCount += 1;
         if (item.isDirectory) {
           queue.push(item.path);
-          folders.push(item);
         } else {
           files.push(item);
         }
@@ -146,10 +145,12 @@ async function scanDrive(driveLetter, options = {}) {
   const raw = await walkDrive(driveRoot);
 
   const topFolders = raw.folders
+    .filter((item) => item.size > 0)
     .sort((a, b) => b.size - a.size)
     .slice(0, MAX_FOLDERS_IN_REPORT);
 
   const topFiles = raw.files
+    .filter((item) => item.size > 0)
     .sort((a, b) => b.size - a.size)
     .slice(0, MAX_FILES_IN_REPORT);
 

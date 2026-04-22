@@ -40,9 +40,10 @@ function createApp() {
         aiApiKey,
         aiModel,
         aiStrict: true,
-        aiBatchSize: Number(req.body?.aiBatchSize || process.env.CDELETE_AI_BATCH_SIZE || 16),
-        aiBatchConcurrency: Number(req.body?.aiBatchConcurrency || process.env.CDELETE_AI_BATCH_CONCURRENCY || 3),
-        maxAiItems: Number(req.body?.maxAiItems || process.env.CDELETE_AI_MAX_ITEMS || 80)
+        aiBatchSize: Number(req.body?.aiBatchSize || process.env.CDELETE_AI_BATCH_SIZE || 8),
+        aiBatchConcurrency: Number(req.body?.aiBatchConcurrency || process.env.CDELETE_AI_BATCH_CONCURRENCY || 2),
+        // Default to full AI coverage unless caller explicitly passes maxAiItems.
+        maxAiItems: req.body?.maxAiItems == null ? 0 : Number(req.body.maxAiItems)
       });
       reports.set(report.id, report);
       return res.json({

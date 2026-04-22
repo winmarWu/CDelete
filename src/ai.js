@@ -3,11 +3,19 @@ const { jsonrepair } = require("jsonrepair");
 const DEFAULT_BASE_URL = process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com/chat/completions";
 const DEFAULT_MODEL = process.env.DEEPSEEK_MODEL || "deepseek-reasoner";
 
+const TEMPLATE_PATTERNS = [
+  "命中规则库",
+  "规则建议为",
+  "请结合业务场景确认",
+  "未命中明确规则"
+];
+
 function createRuleOnlyExplanation(item) {
   const suffix = item.isDirectory ? "目录" : "文件";
+  const name = (item.path || "").split(/\\|\//).filter(Boolean).pop() || item.path || "未知路径";
   return {
-    purpose: `该${suffix}命中规则库：${item.ruleReason}`,
-    riskSummary: `规则建议为「${item.suggestion}」，请结合业务场景确认。`,
+    purpose: `该${suffix}「${name}」需要结合其所在目录和关联程序判断用途。`,
+    riskSummary: `当前建议为「${item.suggestion}」，删除前请先确认是否仍被系统或应用引用。`,
     action: item.suggestion
   };
 }
@@ -40,6 +48,111 @@ function extractJsonObjectOrArray(text) {
   } catch {
     return JSON.parse(jsonrepair(slice));
   }
+}
+
+function isValidAiEntry(entry) {
+  return !!entry
+    && typeof entry.purpose === "string"
+    && entry.purpose.trim().length > 0
+    && typeof entry.riskSummary === "string"
+    && entry.riskSummary.trim().length > 0
+    && typeof entry.action === "string"
+    && entry.action.trim().length > 0;
+}
+
+function looksTemplateLike(entry) {
+  if (!entry) return true;
+  const text = `${entry.purpose || ""}\n${entry.riskSummary || ""}`;
+  return TEMPLATE_PATTERNS.some((keyword) => text.includes(keyword));
+}
+
+function getPathHeuristicExplanation(item) {
+  const normalized = (item.path || "").replace(/\//g, "\\");
+  const lower = normalized.toLowerCase();
+  const name = normalized.split("\\").filter(Boolean).pop() || normalized;
+  let purpose = `该路径「${name}」多用于程序运行或数据存放，需结合实际软件确认来源。`;
+  if (lower.includes("\\windows")) {
+    purpose = `该路径位于 Windows 系统目录（${name}），通常参与系统组件运行与语言资源加载。`;
+  } else if (lower.includes("\\program files")) {
+    purpose = `该路径位于 Program Files（${name}），通常用于安装应用程序与其运行组件。`;
+  } else if (lower.includes("\\programdata")) {
+    purpose = `该路径位于 ProgramData（${name}），常用于软件共享配置、缓存和许可证数据。`;
+  } else if (lower.includes("\\users\\")) {
+    purpose = `该路径位于用户数据区域（${name}），可能包含个人文件或应用用户态配置。`;
+  } else if (lower.includes("\\appdata")) {
+    purpose = `该路径位于 AppData（${name}），常用于应用缓存、配置和临时状态数据。`;
+  }
+
+  let riskSummary = "删除前建议确认是否仍被当前系统或业务软件使用，避免影响软件启动或功能完整性。";
+  if (item.suggestion === "禁止删除") {
+    riskSummary = "该条目风险较高，误删可能导致系统组件或软件功能异常，不建议直接清理。";
+  } else if (item.suggestion === "建议删除") {
+    riskSummary = "若确认是缓存、日志或可再生数据，通常可清理；建议先备份后再删除。";
+  } else if (item.suggestion === "谨慎删除") {
+    riskSummary = "该条目用途不够明确，可能影响用户数据或应用配置，建议先核对再处理。";
+  }
+
+  return {
+    purpose,
+    riskSummary,
+    action: item.suggestion
+  };
+}
+
+async function rewriteSingleItem(item, config) {
+  const prompt = [
+    "你是 Windows 路径分析助手。",
+    "请只输出一个 JSON 对象，格式：{\"purpose\":\"...\",\"riskSummary\":\"...\",\"action\":\"...\"}。",
+    "禁止出现以下措辞：命中规则库、规则建议为、请结合业务场景确认、未命中明确规则。",
+    "purpose 必须结合该路径位置给出具体用途，不要空话；riskSummary 给出删除风险；action 只能是 建议删除/谨慎删除/禁止删除。",
+    `路径: ${item.path}`,
+    `类型: ${item.isDirectory ? "目录" : "文件"}`,
+    `大小(bytes): ${item.size}`,
+    `规则建议: ${item.suggestion}`,
+    `规则原因: ${item.ruleReason}`
+  ].join("\n");
+
+  const response = await fetch(config.baseUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${config.apiKey}`
+    },
+    body: JSON.stringify({
+      model: config.model,
+      temperature: 0.2,
+      max_tokens: 600,
+      response_format: { type: "json_object" },
+      messages: [
+        {
+          role: "system",
+          content: "你擅长根据 Windows 目录层级判断路径用途与删除风险。"
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ]
+    })
+  });
+
+  const raw = await response.text();
+  if (!response.ok) {
+    throw new Error(`DeepSeek 重写失败: ${response.status} ${raw.slice(0, 200)}`);
+  }
+  let apiData;
+  try {
+    apiData = JSON.parse(raw);
+  } catch {
+    apiData = JSON.parse(jsonrepair(raw));
+  }
+  const content = apiData?.choices?.[0]?.message?.content;
+  const parsed = extractJsonObjectOrArray(content || "");
+  return {
+    purpose: parsed.purpose,
+    riskSummary: parsed.riskSummary,
+    action: parsed.action || item.suggestion
+  };
 }
 
 async function explainBatch(batch, config) {
@@ -75,7 +188,7 @@ async function explainBatch(batch, config) {
     body: JSON.stringify({
       model: config.model,
       temperature: 0.2,
-      max_tokens: 1200,
+      max_tokens: 2000,
       response_format: { type: "json_object" },
       messages: [
         {
@@ -108,7 +221,7 @@ async function explainBatch(batch, config) {
 
   const modelContent = apiData?.choices?.[0]?.message?.content;
   if (!modelContent) {
-    throw new Error("DeepSeek 未返回可用内容");
+    throw new Error(`DeepSeek 模型「${config.model}」未返回可用内容，请切换到 deepseek-chat 重试`);
   }
 
   let parsed;
@@ -130,6 +243,27 @@ async function explainBatch(batch, config) {
       action: entry.action
     });
   }
+
+  const missingIds = [];
+  for (let idx = 0; idx < batch.length; idx += 1) {
+    if (!isValidAiEntry(mapped.get(idx))) {
+      missingIds.push(idx);
+    }
+  }
+  if (missingIds.length > 0) {
+    throw new Error(`DeepSeek 返回结果不完整，缺少 ${missingIds.length} 个条目`);
+  }
+
+  const lowQualityIds = [];
+  for (let idx = 0; idx < batch.length; idx += 1) {
+    if (looksTemplateLike(mapped.get(idx))) {
+      lowQualityIds.push(idx);
+    }
+  }
+  if (lowQualityIds.length > 0) {
+    throw new Error(`DeepSeek 返回模板化内容，需重试 ${lowQualityIds.length} 个条目`);
+  }
+
   return mapped;
 }
 
@@ -173,7 +307,8 @@ async function annotateItems(items, options = {}) {
   const strict = options.strict !== false;
   const batchSize = Number(options.batchSize || 12);
   const batchConcurrency = Number(options.batchConcurrency || 2);
-  const maxAiItems = Number(options.maxAiItems || 80);
+  const maxAiItemsInput = Number(options.maxAiItems);
+  const maxAiItems = Number.isFinite(maxAiItemsInput) && maxAiItemsInput > 0 ? Math.floor(maxAiItemsInput) : items.length;
 
   if (!apiKey) {
     if (strict) {
@@ -209,20 +344,47 @@ async function annotateItems(items, options = {}) {
     const mapped = batchResults[i];
     for (let j = 0; j < batch.length; j += 1) {
       const current = batch[j];
-      const ai = mapped.get(j) || createRuleOnlyExplanation(current);
+      const ai = mapped.get(j);
+      if (!isValidAiEntry(ai)) {
+        if (strict) {
+          throw new Error(`AI 解释缺失: ${current.path}`);
+        }
+        aiResult.push({
+          ...current,
+          ...createRuleOnlyExplanation(current)
+        });
+        continue;
+      }
+      let finalAi = ai;
+      if (looksTemplateLike(finalAi)) {
+        try {
+          finalAi = await rewriteSingleItem(current, { apiKey, model, baseUrl });
+        } catch {
+          finalAi = getPathHeuristicExplanation(current);
+        }
+      }
       aiResult.push({
         ...current,
-        ...ai
+        ...finalAi
       });
     }
   }
 
   const ruleResult = ruleOnlyItems.map((item) => ({
     ...item,
-    ...createRuleOnlyExplanation(item)
+    ...getPathHeuristicExplanation(item)
   }));
+  const merged = [...aiResult, ...ruleResult].map((entry) => {
+    if (looksTemplateLike(entry)) {
+      return {
+        ...entry,
+        ...getPathHeuristicExplanation(entry)
+      };
+    }
+    return entry;
+  });
 
-  return [...aiResult, ...ruleResult];
+  return merged;
 }
 
 module.exports = { annotateItems };

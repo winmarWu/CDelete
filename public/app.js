@@ -1,13 +1,23 @@
 function bytesToReadable(bytes) {
-  if (!Number.isFinite(bytes)) {
+  if (!Number.isFinite(bytes) || bytes < 0) {
     return "-";
   }
-  const gb = bytes / (1024 * 1024 * 1024);
-  if (gb >= 1) {
-    return `${gb.toFixed(2)} GB`;
+  if (bytes === 0) {
+    return "0 B";
   }
-  const mb = bytes / (1024 * 1024);
-  return `${mb.toFixed(2)} MB`;
+  if (bytes < 1024) {
+    return `${bytes} B`;
+  }
+  const kb = bytes / 1024;
+  if (kb < 1024) {
+    return `${kb.toFixed(2)} KB`;
+  }
+  const mb = kb / 1024;
+  if (mb < 1024) {
+    return `${mb.toFixed(2)} MB`;
+  }
+  const gb = mb / 1024;
+  return `${gb.toFixed(2)} GB`;
 }
 
 function riskLabel(risk) {
@@ -29,7 +39,7 @@ async function runScan() {
   const aiApiKeyInput = document.getElementById("ai-api-key");
   const aiModelInput = document.getElementById("ai-model");
   const aiApiKey = (aiApiKeyInput?.value || "").trim();
-  const aiModel = (aiModelInput?.value || "deepseek-reasoner").trim();
+  const aiModel = (aiModelInput?.value || "deepseek-chat").trim();
 
   if (!aiApiKey) {
     status.className = "status error";
@@ -114,7 +124,7 @@ function bindEvents() {
     aiApiKeyInput.value = localStorage.getItem("cdelete.aiApiKey") || "";
   }
   if (aiModelInput) {
-    aiModelInput.value = localStorage.getItem("cdelete.aiModel") || "deepseek-reasoner";
+    aiModelInput.value = localStorage.getItem("cdelete.aiModel") || "deepseek-chat";
   }
   if (scanButton) {
     scanButton.addEventListener("click", runScan);
